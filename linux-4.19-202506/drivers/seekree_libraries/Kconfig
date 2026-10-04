@@ -1,0 +1,53 @@
+menuconfig SEEKFREE_KERNEL_DRIVER
+	bool "seekfree kernel driver Support"
+	help
+	  seekfree kernel driver support.
+
+
+if SEEKFREE_KERNEL_DRIVER
+
+config ZF_DEVICE_IMU
+	tristate "zf_device_imu660ra & zf_device_imu660rb & zf_device_imu963ra support"
+	depends on CPU_LOONGSON3 || CPU_LOONGSON2K || CPU_LOONGSON64
+	
+	help
+	  Automatically detect IMU660RA, IMU660RB and IMU963R modules, 
+	  and initialize the IIO devices.
+
+config ZF_DEVICE_DL1X
+	tristate "zf_device_dl1a & zf_device_dl1b support"
+	depends on CPU_LOONGSON3 || CPU_LOONGSON2K || CPU_LOONGSON64
+	
+	help
+	  Automatically detect DL1A, DL1B modules, 
+	  and initialize the IIO devices.
+
+config ZF_DRIVER_ENCODER
+	tristate "zf_driver_encoder support"
+	depends on CPU_LOONGSON3 || CPU_LOONGSON2K || CPU_LOONGSON64
+	help
+	  ATIM GTIM framework driver for loongson2k. 
+	  Support for quadrature encoders and directional encoders requires corresponding device tree modifications to be functional.
+	  
+config ZF_DRIVER_GPIO 
+	tristate "zf_driver_gpio support"
+	depends on CPU_LOONGSON3 || CPU_LOONGSON2K || CPU_LOONGSON64
+	help
+	  GPIO framework driver for loongson2k.
+
+	  Turning this option on will initialize the GPIO device 
+	  in the device tree as a device file. 
+	  You only need to read and write this file to operate the GPIO.
+
+config ZF_DRIVER_PWM
+	tristate "zf_driver_pwm support"
+	depends on CPU_LOONGSON3 || CPU_LOONGSON2K || CPU_LOONGSON64
+	help
+	  PWM framework driver for loongson2k.
+
+	  Turning this option on initializes 
+	  the PWM device in the device tree as a device file. 
+	  You only need to read and write 
+	  this file to operate the PWM device.
+
+endif

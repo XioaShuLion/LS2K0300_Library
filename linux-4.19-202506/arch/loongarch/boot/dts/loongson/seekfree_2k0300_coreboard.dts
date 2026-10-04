@@ -1,0 +1,368 @@
+#include "loongson_2k0300.dtsi"
+
+/ {
+    memory {
+        name = "memory";
+        device_type = "memory";
+        reg =  <0 0x00200000 0 0x0ee00000
+             0 0x90000000 0 0x30000000>;
+    };
+
+    // ----------蜂鸣器---------- //
+    zf_gpio_beep{
+        status = "okay";
+        compatible = "seekfree,gpio_out";
+        gpios = <&gpa1 10 GPIO_ACTIVE_HIGH>;
+	};
+    // ----------蜂鸣器---------- //
+
+    // ----------按键---------- //
+    zf_gpio_key_1{
+        status = "okay";
+        compatible = "seekfree,gpio_in";
+        gpios = <&gpa5 0 GPIO_ACTIVE_HIGH>;
+	};
+
+    zf_gpio_key_2{
+        status = "okay";
+        compatible = "seekfree,gpio_in";
+        gpios = <&gpa4 15 GPIO_ACTIVE_HIGH>;
+	};
+
+    zf_gpio_key_3{
+        status = "okay";
+        compatible = "seekfree,gpio_in";
+        gpios = <&gpa4 14 GPIO_ACTIVE_HIGH>;
+	};
+
+    zf_gpio_key_4{
+        status = "okay";
+        compatible = "seekfree,gpio_in";
+        gpios = <&gpa4 13 GPIO_ACTIVE_HIGH>;
+	};
+    // ----------按键---------- //
+
+    // ----------磁铁感应接口---------- //
+    zf_gpio_hall_detection{
+        status = "okay";
+        compatible = "seekfree,gpio_in";
+        gpios = <&gpa4 1 GPIO_ACTIVE_HIGH>;     // GPIO65
+	};
+    // ----------磁铁感应接口---------- //
+
+    // ----------TOF接口---------- //
+    i2c4{
+        compatible = "i2c-gpio";
+        status = "okay";    
+        gpios = <&gpa3 1 GPIO_ACTIVE_HIGH>, // SDA GPIO49 
+                <&gpa3 0 GPIO_ACTIVE_HIGH>; // SCL GPIO48
+        i2c-gpio,delay-us = <1>;	/* 160 kHz */
+        i2c-gpio,scl-output-only;
+
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        dl1x:dl1x@0{
+            status = "okay"; 
+		    compatible = "seekfree,dl1x";    // 自动识别DL1A DL1B
+            xs-gpios = <&gpa2 6 GPIO_ACTIVE_LOW>; 
+            reg = <0x29>;
+		};
+    };
+    // ----------TOF接口---------- //
+
+    // ----------电机方向引脚---------- //
+    // 电机1方向引脚
+    zf_gpio_motor_1{
+        status = "okay";
+        compatible = "seekfree,gpio_out";
+        gpios = <&gpa4 9 GPIO_ACTIVE_HIGH>;     // GPIO73
+	};
+
+
+    // 电机2方向引脚
+    zf_gpio_motor_2{
+        status = "okay";
+        compatible = "seekfree,gpio_out";
+        gpios = <&gpa4 12 GPIO_ACTIVE_HIGH>;    // GPIO76
+	};
+    // ----------电机方向引脚---------- //
+
+    // ----------电机PWM---------- //
+    zf_pwm_motor_1{
+        compatible = "seekfree,pwm";
+        pwms = <&pwm0 0 1000000>;       // pwm0 通道0 周期(用户不需要关心)
+        status = "okay";
+        freq = <17000>;                 // 17KHZ 频率
+        duty = <0>;                     // 默认 0% 的占空比
+        duty_max = <10000>;             // duty最大值，不建议修改。
+    };
+
+    zf_pwm_motor_2{
+        compatible = "seekfree,pwm";
+        pwms = <&pwm1 0 1000000>;       // pwm1 通道0 周期(用户不需要关心)
+        status = "okay";
+        freq = <17000>;                 // 17KHZ 频率
+        duty = <0>;                     // 默认 0% 的占空比
+        duty_max = <10000>;             // duty最大值，不建议修改。
+    };
+    
+    // ----------电机PWM---------- //  
+
+    // ----------舵机PWM---------- //
+    zf_pwm_servo_1{
+        compatible = "seekfree,pwm";
+        pwms = <&pwm2 0 1000000>;       // pwm3 通道0 周期(用户不需要关心)
+        status = "okay";
+        freq = <300>;                   // 300HZ 频率
+        duty = <0>;                     // 默认 0% 的占空比
+        duty_max = <10000>;             // duty最大值，不建议修改。
+    };
+    // ----------舵机PWM---------- //
+
+    // ----------电调PWM---------- //
+    zf_pwm_esc_1{
+        compatible = "seekfree,pwm";
+        pwms = <&pwm3 0 1000000>;       // pwm2 通道0 周期(用户不需要关心)
+        status = "okay";
+        freq = <50>;                    // 50HZ 频率
+        duty = <0>;                     // 默认 0% 的占空比
+        duty_max = <10000>;             // duty最大值，不建议修改。
+    };
+
+    // ----------电调PWM---------- //
+};
+
+
+&cpu_uart0{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&uart0_2bit_m0>;
+    // auto-flow-control = <1>;
+};
+
+&cpu_uart1{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&uart1_2bit_m0>;
+    // auto-flow-control = <1>;
+};
+
+
+&emmc0{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&sdio0_pin_f0>, <&sdio0_pin_f1>;
+};
+
+&sdio1{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&sdio1_6bit>;
+    cs-gpios = <&gpa4 7 GPIO_ACTIVE_HIGH>;
+};
+
+// norflash驱动
+&spi0{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&spi0_6bit_f0>,<&spi0_6bit_f1>;
+
+    norflash@0 {
+       reg = <0>;
+       spi-rx-bus-width = <4>;
+       spi-max-frequency = <25000000>;
+       #address-cells = <1>;
+       #size-cells = <1>;
+       partitions {
+           compatible = "fixed-partitions";
+           #address-cells = <1>;
+           #size-cells = <1>;
+
+           boot@0 {
+               label = "boot";
+               reg = <0x0000000 0x100000>;
+               /*read-only;*/
+           };
+
+           kernel@100000 {
+               label = "kernel";
+               reg = <0x100000 0x600000>;
+           };
+
+           rootfs@700000 {
+               label = "rootfs";
+               reg = <0x700000 0x1000000>;
+           };
+       };
+
+    };
+};
+
+
+// ----------姿态传感器---------- //
+&spi1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&spi1_4bit>;
+    imu: imu@0 {
+        status = "okay";
+        compatible = "seekfree,imu";                // 自动识别IMU660RA IMU660RB IMU963RA
+        spi-max-frequency = <10000000>;
+        reg = <0>;
+        int2-gpios = <&gpa1 11 GPIO_ACTIVE_HIGH>;   // 仅IMU660RC使用
+    };
+};
+
+
+// ----------IPS200屏幕---------- //
+// 目前支持IPS200和TFT180屏幕。
+// 不支持其他屏幕。
+&spi3{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&spi3_nocs_pin>;
+    // compatible = "loongson,ls-spi-io";
+    // compatible = "loongson,ls-spi-v1";
+    compatible = "loongson,ls-spi-dma";
+    // 软件CS配置
+    num-cs = <1>;
+    cs-gpios = <&gpa5 5 GPIO_ACTIVE_LOW>;
+    // 中断设置
+    interrupt-parent = <&icu>;
+    interrupts = <7>;
+    // DMA配置
+    dmas = <&dma0 3 0xaae>, <&dma0 2 0xaae>;
+    dma-names = "tx", "rx";
+
+    st7789v_or_st7735r:st7789v_or_st7735r@0{
+       status = "okay";
+       compatible = "sitronix,st7789v", "sitronix,st7735r";
+       reg = <0>;              //chip select 0:cs0  1:cs1
+       spi-max-frequency = <50000000>;
+       spi-mode = <0>;
+       rgb;
+       rotate = <0>;           // 旋转方向 0 90 180 270
+       buswidth = <8>;
+       fps = <50>;             // 帧率
+       
+       reset-gpios = <&gpa5 1 GPIO_ACTIVE_HIGH>;   // GPIO81
+       dc-gpios = <&gpa4 10 GPIO_ACTIVE_HIGH>;     // GPIO74
+       led-gpios = <&gpa4 11 GPIO_ACTIVE_LOW>;     // 背光引脚 GPIO75
+
+       // width = <240>;     
+       // height= <320>;      
+
+       debug = <0x2>;
+    };
+
+    // spidev@0{
+    //     status = "okay";
+    //     compatible = "spidev";
+    //     reg = <0>;
+    //     spi-max-frequency = <10000000>;
+    // };
+
+
+};
+
+
+
+// ----------IPS200屏幕---------- //
+
+// ----------正交编码器配置---------- //
+// 正交编码器和方向编码器只能二选一使用，不能同时使用
+// 正交编码器和方向编码器只能二选一使用，不能同时使用
+// 正交编码器和方向编码器只能二选一使用，不能同时使用
+&encoder_atim{
+    status = "okay";
+    compatible = "seekfree,encoder_quad";
+    pinctrl-names = "default";
+    pinctrl-0 = <&atim_ch1_pin_m0>, <&atim_ch2_pin_m0>;   
+    dev-name = "zf_encoder_quad_1";
+};
+
+&encoder_gtim{
+    status = "okay";
+    compatible = "seekfree,encoder_quad";
+    pinctrl-names = "default";
+    pinctrl-0 = <&gtim_ch1_pin_m0>, <&gtim_ch2_pin_m0>;   
+    dev-name = "zf_encoder_quad_2";
+};
+// ----------正交编码器配置---------- //
+
+// ----------方向编码器配置---------- //
+// 正交编码器和方向编码器只能二选一使用，不能同时使用
+// 正交编码器和方向编码器只能二选一使用，不能同时使用
+// 正交编码器和方向编码器只能二选一使用，不能同时使用
+// &encoder_atim{
+//     status = "okay";
+//     compatible = "seekfree,encoder_dir";
+//     pinctrl-names = "default";
+//     pinctrl-0 = <&atim_ch1_pin_m0>;   
+//     dir-gpios = <&gpa1 13 GPIO_ACTIVE_LOW>;
+//     dev-name = "zf_encoder_dir_1";
+// };
+
+// &encoder_gtim{
+//     status = "okay";
+//     compatible = "seekfree,encoder_dir";
+//     pinctrl-names = "default";
+//     pinctrl-0 = <&gtim_ch1_pin_m0>;
+//     dir-gpios = <&gpa2 3 GPIO_ACTIVE_LOW>;
+//     dev-name = "zf_encoder_dir_2";
+// };
+// ----------方向编码器配置---------- //
+
+// ----------电机PWM配置---------- //
+// 电机信号1
+// DIR_GPIO73
+// GPIO86
+&pwm0{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pwm0_mux_m1>;
+    clock-frequency = <160000000>;
+    compatible = "loongson,ls300-pwm";
+};
+
+// 电机信号2
+// DIR_GPIO76
+// GPIO87
+&pwm1{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pwm1_mux_m1>;
+    clock-frequency = <160000000>;
+    compatible = "loongson,ls300-pwm";
+};
+
+// 舵机信号
+// GPIO88
+&pwm2{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pwm2_mux_m1>;
+    clock-frequency = <160000000>;
+    compatible = "loongson,ls300-pwm";
+};
+
+// 电调信号
+// GPIO89
+&pwm3{
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&pwm3_mux_m1>;
+    clock-frequency = <160000000>;
+    compatible = "loongson,ls300-pwm";
+};
+// ----------电机PWM配置---------- //
+
+
+
+
+// ----------ADC配置----------//
+&adc{
+	status = "okay";
+};
+// ----------ADC配置----------//

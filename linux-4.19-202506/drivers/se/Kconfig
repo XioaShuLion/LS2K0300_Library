@@ -1,0 +1,12 @@
+config SE_LS                                                                                                                      
+    tristate "Loongson SE support"
+    depends on CPU_LOONGSON2K || CPU_LOONGSON64
+	default m
+    help
+      Generic SE driver for loongson2.
+
+      To compile this driver as a module, choose M here: the module
+      will be called se-ls.
+
+
+
