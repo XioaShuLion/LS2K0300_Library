@@ -86,15 +86,16 @@
 		loongson,pinmux-funcsel = <PINCTL_FUNCTIONMAIN>;
 	};
 
-	spi3_pin: spi3-pin{
-		loongson,pinmux = <&gpa5 2 5>;
-		loongson,pinmux-funcsel = <PINCTL_FUNCTION1>;
-	};
+/* ---- 把 SPI3 的引脚组拆开，释放 GPIO83 ---- */
 
-	spi3_nocs_pin: spi3-nocs-pin{
-		loongson,pinmux = <&gpa5 2 4>;
-		loongson,pinmux-funcsel = <PINCTL_FUNCTION1>;
-	};
+    spi3_clk_pin: spi3-clk-pin {
+        loongson,pinmux = <&gpa5 2 2>;          /* GPIO82 = spi3_clk  */
+        loongson,pinmux-funcsel = <PINCTL_FUNCTION1>;
+    };
+    spi3_mosi_pin: spi3-mosi-pin {
+        loongson,pinmux = <&gpa5 4 4>;          /* GPIO84 = spi3_mosi */
+        loongson,pinmux-funcsel = <PINCTL_FUNCTION1>;
+    };
 
 	pwm0_pin: pwm0-pin{
 		pwm0_mux_m0: pwm0-mux-m0{

@@ -40,6 +40,11 @@
         compatible = "seekfree,gpio_in";
         gpios = <&gpa4 13 GPIO_ACTIVE_HIGH>;
 	};
+    zf_gpio_key_5{
+        status = "okay";
+        compatible = "seekfree,gpio_in";
+        gpios = <&gpa5 3 GPIO_ACTIVE_HIGH>;
+    };
     // ----------按键---------- //
 
     // ----------磁铁感应接口---------- //
@@ -221,7 +226,9 @@
 &spi3{
     status = "okay";
     pinctrl-names = "default";
-    pinctrl-0 = <&spi3_nocs_pin>;
+
+    pinctrl-0 = <&spi3_clk_pin>, <&spi3_mosi_pin>;//<&spi3_nocs_pin>;
+
     // compatible = "loongson,ls-spi-io";
     // compatible = "loongson,ls-spi-v1";
     compatible = "loongson,ls-spi-dma";

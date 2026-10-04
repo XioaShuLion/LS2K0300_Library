@@ -6,7 +6,7 @@ trap 'echo -e "\033[31m[错误] 脚本执行失败：$1\033[0m" >&2' ERR  # 全�
 export PATH=/opt/ls_2k0300_env/loongson-gnu-toolchain-8.3-x86_64-loongarch64-linux-gnu-rc1.6/bin:$PATH
 
 # ===================== 配置区（按需修改）=====================
-SSH_IP="192.168.2.33"    # 目标SSH地址
+SSH_IP="10.121.180.137"    # 目标SSH地址
 SSH_USER="root"           # SSH用户名
 SSH_TARGET_DIR="/boot"    # 目标文件存放目录
 COMPILE_ARCH="loongarch"  # 编译架构

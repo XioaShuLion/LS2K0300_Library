@@ -1,4 +1,3 @@
-
 /*********************************************************************************************************************
 * LS2K0300 Opensourec Library 即（LS2K0300 开源库）是一个基于官方 SDK 接口的第三方开源库
 * Copyright (c) 2022 SEEKFREE 逐飞科技
@@ -50,12 +49,9 @@
 // 1.将2K300核心板插到主板上面 主板使用电池供电 下载本例程
 // 
 // 2.打开终端可以看到:
-// key_0 = x.
-// key_1 = x.
-// key_2 = x.
-// key_3 = x.
+//    CPU 温度: 45.000 C        ← 每秒打印一次
 //
-// 3.按下按键即可看到不同的输出状态
+// 3.需要按键输出时，取消主循环里 printf 的注释即可
 //
 // **************************** 代码区域 ****************************
 
@@ -63,23 +59,79 @@
 #define KEY_2_PATH        ZF_GPIO_KEY_2
 #define KEY_3_PATH        ZF_GPIO_KEY_3
 #define KEY_4_PATH        ZF_GPIO_KEY_4
+#define KEY_5_PATH        ZF_GPIO_KEY_5
 
 zf_driver_gpio  key_1(KEY_1_PATH, O_RDWR);
 zf_driver_gpio  key_2(KEY_2_PATH, O_RDWR);
 zf_driver_gpio  key_3(KEY_3_PATH, O_RDWR);
 zf_driver_gpio  key_4(KEY_4_PATH, O_RDWR);
+zf_driver_gpio  key_5(KEY_5_PATH, O_RDWR);
+
+// ---------------------------------------------------------------------------
+// CPU 温度来源
+//
+//   内核里 CPU 温度走的是 hwmon，不是 thermal（所以 /sys/class/thermal/ 是空的）
+//     /sys/class/hwmon/hwmon0/name        -> "cpu-hwmon"
+//     /sys/class/hwmon/hwmon0/temp1_input -> 45
+//
+//   ⚠️ 单位陷阱：标准 hwmon ABI 规定 tempN_input 是【毫摄氏度】(45000 = 45.000C)，
+//      但逐飞这颗 vendor 驱动直接输出【整摄氏度】，所以不能按标准除以 1000。
+//      下面的代码会自动识别两种单位。
+// ---------------------------------------------------------------------------
+#define CPU_TEMPERATURE_PATH    "/sys/class/hwmon/hwmon0/temp1_input"
+
+#define LOOP_PERIOD_MS          (100)   // 主循环周期
+#define TEMP_PRINT_DIVIDER      (10)    // 每 10 次循环（= 1 秒）打印一次温度
 
 int main(int, char**) 
 {
+    int tick = 0;
 
     while(1)
     {
+        // ---------- 按键 ----------
         printf("key_1 = %d\r\n", key_1.get_level());
         printf("key_2 = %d\r\n", key_2.get_level());
         printf("key_3 = %d\r\n", key_3.get_level());
         printf("key_4 = %d\r\n", key_4.get_level());
+        printf("key_5 = %d\r\n", key_5.get_level());
 
-        system_delay_ms(100);
+        // ---------- CPU 温度（每 1 秒一次）----------
+        if (++tick >= TEMP_PRINT_DIVIDER)
+        {
+            tick = 0;
+
+            FILE *fp = fopen(CPU_TEMPERATURE_PATH, "r");
+
+            if (fp == nullptr)
+            {
+                // 一路不通时的兜底：节点不存在 / 内核没这个驱动
+                printf("CPU 温度: 读取失败\r\n");
+            }
+            else
+            {
+                int raw = 0;
+
+                if (fscanf(fp, "%d", &raw) != 1)
+                {
+                    printf("CPU 温度: 解析失败\r\n");
+                }
+                else if (raw > 1000 || raw < -1000)
+                {
+                    // 标准 hwmon 单位：毫摄氏度，例如 45000 -> 45.000 C
+                    printf("CPU 温度: %d.%03d C\r\n", raw / 1000, raw % 1000);
+                }
+                else
+                {
+                    // 逐飞驱动单位：整摄氏度，例如 45 -> 45.000 C
+                    printf("CPU 温度: %d.000 C\r\n", raw);
+                }
+
+                fclose(fp);
+            }
+        }
+
+        system_delay_ms(LOOP_PERIOD_MS);
     }
 }
 
@@ -92,3 +144,11 @@ int main(int, char**)
 //      使用本历程，就需要使用我们逐飞科技提供的内核，否则提示xxx文件找不到
 //      使用本历程，就需要使用我们逐飞科技提供的内核，否则提示xxx文件找不到
 //      使用本历程，就需要使用我们逐飞科技提供的内核，否则提示xxx文件找不到
+//
+// 问题2：温度一直打印"读取失败"
+//      板上确认：cat /sys/class/hwmon/hwmon0/temp1_input
+//      能出数字说明路径没问题；目录不存在说明内核里没有 cpu-hwmon 驱动
+//
+// 问题3：温度数值明显不对（比如显示 0.045 C）
+//      说明内核换成了标准 hwmon 驱动（毫摄氏度）。
+//      本代码已做自动识别，正常不会出现；若出现请检查 raw 的实际取值。
