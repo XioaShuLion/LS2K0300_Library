@@ -99,6 +99,8 @@ private:
     float   pitch;                  // IMU660RC姿态解算pitch角度
     float   yaw;                    // IMU660RC姿态解算yaw角度
 
+    float   quat_wxyz[4];           // 归一化四元数缓存(标准顺序 w,x,y,z)
+
     // 私有化核心函数：通过文件句柄读取原始数据并转int16
     int16 imu_read_fd_data(int fd);
     // 私有化函数：关闭所有打开的文件句柄
@@ -216,6 +218,15 @@ public:
 
     void quarternion_normalize();
     void quarternion_to_euler(float *roll, float *pitch, float *yaw);
+
+//-------------------------------------------------------------------------------------------------------------------
+// 函数简介 获取归一化后的四元数(标准顺序 w,x,y,z)，仅imu660rc可用
+// 参数说明 无
+// 返回参数 float* 长度为4的四元数数组指针[w,x,y,z]，非imu660rc返回nullptr
+// 使用示例 float *q = imu_dev.get_quarternion_float();
+// 备注信息 需先依次调用 get_quarternion()、quarternion_normalize() 再调用本函数
+//-------------------------------------------------------------------------------------------------------------------
+    float *get_quarternion_float(void);
 
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介 IMU设备初始化【核心流程：写1初始化→读该文件获型号→按型号开文件】

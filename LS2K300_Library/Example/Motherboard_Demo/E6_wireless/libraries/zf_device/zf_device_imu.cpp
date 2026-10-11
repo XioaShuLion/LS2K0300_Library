@@ -366,6 +366,29 @@ void zf_device_imu::quarternion_to_euler( float *roll, float *pitch, float *yaw)
     *yaw    = euler[2];
 }
 
+//-------------------------------------------------------------------------------------------------------------------
+// 函数简介 获取归一化后的四元数(标准顺序 w,x,y,z)，仅imu660rc可用
+// 参数说明 无
+// 返回参数 float* 长度为4的四元数数组指针[w,x,y,z]，非imu660rc返回nullptr
+// 使用示例 float *q = imu_dev.get_quarternion_float();
+// 备注信息 需先调用 get_quarternion() 与 quarternion_normalize()，再调用本函数
+//-------------------------------------------------------------------------------------------------------------------
+float *zf_device_imu::get_quarternion_float(void)
+{
+    if(imu_type != DEV_IMU660RC)
+    {
+        return nullptr;
+    }
+
+    // 驱动内部 quarternion[] 顺序为 (y, x, z, w)，此处重排为标准四元数顺序 (w, x, y, z)
+    quat_wxyz[0] = quarternion[3];  // w
+    quat_wxyz[1] = quarternion[1];  // x
+    quat_wxyz[2] = quarternion[0];  // y
+    quat_wxyz[3] = quarternion[2];  // z
+
+    return quat_wxyz;
+}
+
 
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介 IMU设备初始化【核心流程：写1初始化→读该文件获型号→按型号开文件】
