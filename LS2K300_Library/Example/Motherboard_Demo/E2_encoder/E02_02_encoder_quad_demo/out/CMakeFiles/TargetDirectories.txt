@@ -1,3 +1,0 @@
-/home/seekfree/LS2K0300_Library/LS2K300_Library/Example/Motherboard_Demo/E2_encoder/E02_02_encoder_quad_demo/out/CMakeFiles/E02_02_encoder_quad_demo.dir
-/home/seekfree/LS2K0300_Library/LS2K300_Library/Example/Motherboard_Demo/E2_encoder/E02_02_encoder_quad_demo/out/CMakeFiles/edit_cache.dir
-/home/seekfree/LS2K0300_Library/LS2K300_Library/Example/Motherboard_Demo/E2_encoder/E02_02_encoder_quad_demo/out/CMakeFiles/rebuild_cache.dir
